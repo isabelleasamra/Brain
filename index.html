@@ -266,7 +266,8 @@
     displayName = {};
     Object.entries(tally).forEach(([k, names]) => { displayName[k] = Object.entries(names).sort((a, b) => b[1] - a[1])[0][0]; });
   }
-  const nice = n => n ? (displayName[key(n)] || n) : "";
+    const titleCase = s => s.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+  const nice = n => n ? titleCase(displayName[key(n)] || n) : "";
 
   // Where an item sits in the Library: category + subcategory, with iCloud folders used as categories.
   function place(i) {
