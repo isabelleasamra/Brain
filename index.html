@@ -72,6 +72,17 @@
   .chips button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
   .back{color:var(--accent);font-size:16px;font-weight:500;margin-bottom:6px;display:inline-block}
 
+  /* ---------- ask ---------- */
+  .msg{max-width:88%;padding:12px 16px;border-radius:18px;margin-bottom:10px;white-space:pre-wrap;word-break:break-word;line-height:1.45}
+  .msg.me{background:var(--ink);color:#fff;margin-left:auto;border-bottom-right-radius:6px}
+  .msg.ai{background:var(--surface);border:1px solid var(--line);border-bottom-left-radius:6px}
+  .msg.ai.thinking{color:var(--muted)}
+  .sources{margin:-2px 0 16px}
+  .sources .item{padding:10px 14px}
+  .sources .item .title{font-size:15px}
+  .starters{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .starters button{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:9px 14px;font-size:15px;color:var(--ink)}
+
   /* ---------- bottom bar ---------- */
   #bar{position:fixed;left:0;right:0;bottom:0;padding:10px var(--pad) calc(12px + env(safe-area-inset-bottom));
     background:linear-gradient(to top,var(--bg) 70%,rgba(243,245,248,0));}
@@ -93,7 +104,7 @@
 <!-- ===================== SETTINGS: paste your two Supabase values here ===================== -->
 <script>
   const SUPABASE_URL = "https://oyxipshykjwxwpdgejvb.supabase.co";
-  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im95eGlwc2h5a2p3eHdwZGdlanZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1NTY3ODcsImV4cCI6MjEwNTEzMjc4N30.A5fzg_dryMgMYL3u6c3GyJMtdm9rxhfWJ5aEj08Ghck";
+  const SUPABASE_KEY = "PASTE_YOUR_ANON_PUBLISHABLE_KEY_HERE";
 </script>
 <!-- ========================================================================================= -->
 
@@ -142,8 +153,14 @@
     </div>
 
     <div class="screen" id="ask">
-      <div class="heading"><div><h1>Ask</h1><div class="sub">Coming later</div></div></div>
-      <div class="empty">Chat with your brain. We'll build this after Library.</div>
+      <div class="heading"><div><h1>Ask</h1><div class="sub">Questions answered from your saves</div></div><button id="clearChat">Clear</button></div>
+      <div id="chat"></div>
+      <div id="starters" class="starters">
+        <button>What recipes have I saved?</button>
+        <button>Places to visit in Vietnam</button>
+        <button>Dumbbell exercises I saved</button>
+        <button>Any iPhone tricks?</button>
+      </div>
     </div>
   </main>
 
@@ -160,6 +177,10 @@
     </div>
     <div class="composer" id="searchBar" style="display:none">
       <input class="field" id="searchBox" type="search" placeholder="Search your brain" enterkeyhint="search" autocomplete="off">
+    </div>
+    <div class="composer" id="askBar" style="display:none">
+      <input class="field" id="askBox" placeholder="Ask your brain" enterkeyhint="send" autocomplete="off">
+      <button id="askSend">Ask</button>
     </div>
   </div>
 </section>
@@ -202,6 +223,7 @@
     document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === b.dataset.tab));
     $("composer").style.display = b.dataset.tab === "today" ? "flex" : "none";
     $("searchBar").style.display = b.dataset.tab === "library" ? "flex" : "none";
+    $("askBar").style.display = b.dataset.tab === "ask" ? "flex" : "none";
     window.scrollTo(0,0);
   });
 
@@ -266,8 +288,7 @@
     displayName = {};
     Object.entries(tally).forEach(([k, names]) => { displayName[k] = Object.entries(names).sort((a, b) => b[1] - a[1])[0][0]; });
   }
-    const titleCase = s => s.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
-  const nice = n => n ? titleCase(displayName[key(n)] || n) : "";
+  const nice = n => n ? (displayName[key(n)] || n) : "";
 
   // Where an item sits in the Library: category + subcategory, with iCloud folders used as categories.
   function place(i) {
@@ -362,6 +383,43 @@
     $("searchItems").innerHTML = hit.length ? hit.slice(0, 100).map(renderItem).join("") : `<div class="empty">Nothing matches "${esc(q)}".</div>`;
     $("libCats").style.display = "none"; $("libCat").style.display = "none"; $("libSearch").style.display = "block";
   });
+  // ---------- ask ----------
+  let history = [];
+  function addMsg(role, text, cls = "") {
+    const d = document.createElement("div"); d.className = `msg ${role} ${cls}`.trim(); d.textContent = text;
+    $("chat").appendChild(d); $("starters").style.display = "none";
+    window.scrollTo(0, document.body.scrollHeight); return d;
+  }
+  async function ask(q) {
+    q = (q || "").trim(); if (!q) return;
+    $("askBox").value = ""; $("askSend").disabled = true;
+    addMsg("me", q);
+    const wait = addMsg("ai", "Looking through your brain…", "thinking");
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      const r = await fetch(`${SUPABASE_URL}/functions/v1/ask`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${session.access_token}` },
+        body: JSON.stringify({ question: q, history })
+      });
+      const out = await r.json();
+      if (!r.ok || out.error) throw new Error(out.error || `Error ${r.status}`);
+      wait.classList.remove("thinking"); wait.textContent = out.answer;
+      history.push({ role: "user", content: q }, { role: "assistant", content: out.answer });
+      if (out.sources && out.sources.length) {
+        const src = document.createElement("div"); src.className = "sources";
+        src.innerHTML = out.sources.map(renderItem).join(""); $("chat").appendChild(src);
+      }
+    } catch (e) {
+      wait.classList.remove("thinking"); wait.textContent = "Couldn't get an answer: " + e.message;
+    }
+    $("askSend").disabled = false; window.scrollTo(0, document.body.scrollHeight);
+  }
+  $("askSend").onclick = () => ask($("askBox").value);
+  $("askBox").addEventListener("keydown", e => { if (e.key === "Enter") ask($("askBox").value); });
+  document.querySelectorAll("#starters button").forEach(b => b.onclick = () => ask(b.textContent));
+  $("clearChat").onclick = () => { history = []; $("chat").innerHTML = ""; $("starters").style.display = "flex"; };
+
   $("refreshInbox").onclick = () => { loadInbox(); toast("Refreshed"); };
 </script>
 </body>
