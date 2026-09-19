@@ -93,7 +93,7 @@
 <!-- ===================== SETTINGS: paste your two Supabase values here ===================== -->
 <script>
   const SUPABASE_URL = "https://oyxipshykjwxwpdgejvb.supabase.co";
-  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im95eGlwc2h5a2p3eHdwZGdlanZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1NTY3ODcsImV4cCI6MjEwNTEzMjc4N30.A5fzg_dryMgMYL3u6c3GyJMtdm9rxhfWJ5aEj08Ghck";
+  const SUPABASE_KEY = "PASTE_YOUR_ANON_PUBLISHABLE_KEY_HERE";
 </script>
 <!-- ========================================================================================= -->
 
@@ -255,6 +255,18 @@
   const ITEM_COLS = "id,url,source,category,subcategory,title,body,author,hashtags,ig_collection,folder,saved_at";
   const sourceName = s => ({instagram:"Instagram", web:"TikTok", tiktok:"TikTok", icloud:"iCloud", apple_notes:"Notes", notion:"Notion"}[s] || s || "");
   const tidy = s => (s || "").replace(/[-_]+/g, " ").trim();
+  // "recipe", "Recipe" and "RECIPES" all share one key
+  const key = s => tidy(s).toLowerCase().replace(/s$/, "");
+  // Pick the spelling used most often for each key, so the Library shows one name
+  let displayName = {};
+  function buildNames() {
+    const tally = {};
+    allItems.forEach(i => { const p = place(i); [p.cat, p.sub].filter(Boolean).forEach(n => {
+      const k = key(n); tally[k] = tally[k] || {}; tally[k][n] = (tally[k][n] || 0) + 1; }); });
+    displayName = {};
+    Object.entries(tally).forEach(([k, names]) => { displayName[k] = Object.entries(names).sort((a, b) => b[1] - a[1])[0][0]; });
+  }
+  const nice = n => n ? (displayName[key(n)] || n) : "";
 
   // Where an item sits in the Library: category + subcategory, with iCloud folders used as categories.
   function place(i) {
@@ -269,14 +281,14 @@
   }
 
   function renderItem(i) {
-        let link = "";
+    let link = "";
     if (i.url && i.url.startsWith("http")) link = i.url;
     else if (i.url && i.url.startsWith("icloud://")) {
       const path = i.url.replace(/^icloud:\/\/(iCloudDrive\/)?/i, "");
       link = "shareddocuments:///private/var/mobile/Library/Mobile%20Documents/com~apple~CloudDocs/" + encodeURI(path);
     }
     const p = place(i);
-    const cat = [p.cat, p.sub].filter(Boolean).join(" / ");
+    const cat = [nice(p.cat), nice(p.sub)].filter(Boolean).join(" / ");
     const preview = i.body && i.body !== i.title ? i.body : "";
     const meta = [sourceName(i.source), i.author ? "@" + i.author : "", i.saved_at ? niceDate(i.saved_at) : ""].filter(Boolean).join(" · ");
     const inner = `
@@ -302,14 +314,14 @@
   async function loadLibrary() {
     const { data, error } = await sb.from("items").select(ITEM_COLS).order("saved_at", { ascending: false }).limit(5000);
     if (error) { $("catList").innerHTML = `<div class="empty">Couldn't load your library: ${esc(error.message)}</div>`; return; }
-    allItems = data;
+    allItems = data; buildNames();
     $("libCount").textContent = `${data.length} items`;
     renderCategories();
   }
 
   function renderCategories() {
     const counts = {};
-    allItems.forEach(i => { const c = place(i).cat; counts[c] = (counts[c] || 0) + 1; });
+    allItems.forEach(i => { const c = nice(place(i).cat); counts[c] = (counts[c] || 0) + 1; });
     const names = Object.keys(counts).sort((a, b) => a === "Uncategorised" ? 1 : b === "Uncategorised" ? -1 : a.localeCompare(b));
     $("catList").innerHTML = names.map(n => `
       <button class="catrow" data-cat="${esc(n)}"><span class="name">${esc(n)}</span><span class="count">${counts[n]}</span></button>`).join("");
@@ -317,14 +329,14 @@
   }
 
   function openCategory(cat) {
-    const items = allItems.filter(i => place(i).cat === cat);
-    const subs = [...new Set(items.map(i => place(i).sub).filter(Boolean))].sort();
+    const items = allItems.filter(i => key(place(i).cat) === key(cat));
+    const subs = [...new Set(items.map(i => nice(place(i).sub)).filter(Boolean))].sort();
     $("libCatTitle").textContent = cat;
     $("libCatCount").textContent = `${items.length} items`;
     $("subChips").innerHTML = subs.length
       ? [`<button class="on" data-sub="">All</button>`, ...subs.map(s => `<button data-sub="${esc(s)}">${esc(s)}</button>`)].join("") : "";
     const show = sub => {
-      const list = sub ? items.filter(i => place(i).sub === sub) : items;
+      const list = sub ? items.filter(i => key(place(i).sub) === key(sub)) : items;
       $("catItems").innerHTML = list.map(renderItem).join("");
     };
     document.querySelectorAll("#subChips button").forEach(b => b.onclick = () => {
