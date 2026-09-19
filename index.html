@@ -1,6 +1,3 @@
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -230,7 +227,7 @@
 
   // ---------- inbox ----------
   async function loadInbox() {
-    const { data, error } = await sb.from("items").select("*").limit(60);
+    const { data, error } = await sb.from("items").select("*").order("created_at", { ascending: false }).limit(60);
     if (error) { $("itemList").innerHTML = `<div class="empty">Couldn't load items: ${esc(error.message)}</div>`; return; }
     $("inboxCount").textContent = data.length ? `Latest ${data.length} saves` : "";
     if (!data.length) { $("itemList").innerHTML = `<div class="empty">Nothing saved yet. Share something with "Save to Brain" and it will appear here.</div>`; return; }
