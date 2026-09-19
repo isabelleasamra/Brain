@@ -229,7 +229,7 @@
   async function loadInbox() {
     const { data, error } = await sb.from("items")
       .select("id,url,source,category,subcategory,title,body,author,ig_collection,folder,saved_at")
-            .neq("source", "icloud").order("saved_at", { ascending: false }).limit(60);
+      .order("saved_at", { ascending: false }).limit(60);
     if (error) { $("itemList").innerHTML = `<div class="empty">Couldn't load items: ${esc(error.message)}</div>`; return; }
     $("inboxCount").textContent = data.length ? `Latest ${data.length} saves` : "";
     if (!data.length) { $("itemList").innerHTML = `<div class="empty">Nothing saved yet. Share something with "Save to Brain" and it will appear here.</div>`; return; }
