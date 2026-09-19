@@ -227,22 +227,24 @@
 
   // ---------- inbox ----------
   async function loadInbox() {
-    const { data, error } = await sb.from("items").select("*").order("created_at", { ascending: false }).limit(60);
+    const { data, error } = await sb.from("items")
+      .select("id,url,source,category,subcategory,title,body,author,ig_collection,folder,saved_at")
+      .order("saved_at", { ascending: false }).limit(60);
     if (error) { $("itemList").innerHTML = `<div class="empty">Couldn't load items: ${esc(error.message)}</div>`; return; }
     $("inboxCount").textContent = data.length ? `Latest ${data.length} saves` : "";
     if (!data.length) { $("itemList").innerHTML = `<div class="empty">Nothing saved yet. Share something with "Save to Brain" and it will appear here.</div>`; return; }
+    const sourceName = s => ({instagram:"Instagram", web:"TikTok", tiktok:"TikTok", icloud:"iCloud", apple_notes:"Notes", notion:"Notion"}[s] || s || "");
     $("itemList").innerHTML = data.map(i => {
-      const link = i.url || i.link || "";
-      const cat = [i.category, i.subcategory].filter(Boolean).join(" · ");
+      const link = i.url && i.url.startsWith("http") ? i.url : "";
+      const cat = [i.category, i.subcategory].filter(Boolean).join(" / ")
+        || i.ig_collection || (i.folder ? i.folder.split("/").pop() : "");
+      const preview = i.body && i.body !== i.title ? i.body : "";
+      const meta = [sourceName(i.source), i.author ? "@" + i.author : "", i.saved_at ? niceDate(i.saved_at) : ""].filter(Boolean).join(" · ");
       const inner = `
         ${cat ? `<div class="cat">${esc(cat)}</div>` : ""}
-        <div class="title">${esc(i.title || link || "Untitled")}</div>
-        ${i.note ? `<div class="note">${esc(i.note)}</div>` : ""}
-        <div class="when">${esc(i.source || "")}${i.source ? " · " : ""}${i.created_at ? niceDate(i.created_at) : ""}</div>`;
+        <div class="title">${esc(i.title || "Untitled")}</div>
+        ${preview ? `<div class="note">${esc(preview)}</div>` : ""}
+        <div class="when">${esc(meta)}</div>`;
       return link ? `<a class="item" href="${esc(link)}" target="_blank" rel="noopener">${inner}</a>` : `<div class="item">${inner}</div>`;
     }).join("");
   }
-  $("refreshInbox").onclick = () => { loadInbox(); toast("Refreshed"); };
-</script>
-</body>
-</html>
