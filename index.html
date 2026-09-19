@@ -269,7 +269,12 @@
   }
 
   function renderItem(i) {
-    const link = i.url && i.url.startsWith("http") ? i.url : "";
+        let link = "";
+    if (i.url && i.url.startsWith("http")) link = i.url;
+    else if (i.url && i.url.startsWith("icloud://")) {
+      const path = i.url.replace(/^icloud:\/\/(iCloudDrive\/)?/i, "");
+      link = "shareddocuments:///private/var/mobile/Library/Mobile%20Documents/com~apple~CloudDocs/" + encodeURI(path);
+    }
     const p = place(i);
     const cat = [p.cat, p.sub].filter(Boolean).join(" / ");
     const preview = i.body && i.body !== i.title ? i.body : "";
