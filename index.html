@@ -4,102 +4,194 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#F3F5F8">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Brain">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#F4F3EF">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0A0A0C">
+<meta name="color-scheme" content="light dark">
 <title>Brain</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
+  /* ---------- theme: follows the iPhone light/dark setting ---------- */
   :root{
-    --bg:#F3F5F8; --surface:#FFFFFF; --ink:#18212B; --muted:#6C7787;
-    --line:#E1E6EC; --accent:#2B6C86; --accent-ink:#FFFFFF; --done:#9AA6B4;
-    --pad:18px; --radius:14px;
+    --bg:#F4F3EF; --card:#FFFFFF; --card2:#EBEAE4; --ink:#141416; --muted:#63636B;
+    --line:rgba(0,0,0,.06); --teal:#0E8A7C; --teal-ink:#0B6F64; --teal-tint:#D6F1EC;
+    --salmon:#DD6558; --salmon-ink:#B5493D; --salmon-tint:#FBE1DC; --on-accent:#FFFFFF;
+    --bar:rgba(244,243,239,.94); --shadow:0 8px 24px rgba(0,0,0,.08);
+    --pad:16px; --r:24px; --r2:20px; --r3:14px;
+    --display:'Sora',system-ui,sans-serif; --body:'Manrope',system-ui,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#0A0A0C; --card:#16161A; --card2:#1F1F25; --ink:#F5F4F0; --muted:#A3A3AC;
+      --line:rgba(255,255,255,.07); --teal:#2FD9C4; --teal-ink:#2FD9C4; --teal-tint:#0F2926;
+      --salmon:#F4877B; --salmon-ink:#F4877B; --salmon-tint:#2C1A18; --on-accent:#0A0A0C;
+      --bar:rgba(16,16,19,.92); --shadow:0 8px 24px rgba(0,0,0,.35);
+    }
   }
   *{box-sizing:border-box}
-  html,body{margin:0;background:var(--bg);color:var(--ink);
-    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
-    -webkit-font-smoothing:antialiased;font-size:17px;line-height:1.4}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);
+    -webkit-font-smoothing:antialiased;font-size:16px;line-height:1.4}
   button,input{font:inherit;color:inherit}
   button{background:none;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
-  a{color:var(--accent)}
+  a{color:var(--teal-ink);text-decoration:none}
+  h1,h2{font-family:var(--display);letter-spacing:-.02em;margin:0}
+  svg.i{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none}
 
   /* ---------- sign in ---------- */
-  #auth{min-height:100dvh;display:flex;flex-direction:column;justify-content:center;padding:var(--pad);gap:14px;max-width:420px;margin:0 auto}
-  #auth h1{font-size:44px;font-weight:700;letter-spacing:-.03em;margin:0 0 6px}
+  #auth{min-height:100dvh;display:flex;flex-direction:column;justify-content:center;padding:var(--pad);gap:12px;max-width:420px;margin:0 auto}
+  #auth .mark{width:88px;height:88px;border-radius:24px;background:#0A0A0C;display:flex;align-items:center;justify-content:center;margin-bottom:8px;box-shadow:var(--shadow)}
+  #auth h1{font-size:40px;font-weight:700;margin:0 0 2px}
   #auth p{margin:0 0 10px;color:var(--muted)}
-  .field{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;width:100%;font-size:17px;outline:none}
-  .field:focus{border-color:var(--accent)}
-  .primary{background:var(--accent);color:var(--accent-ink);border-radius:var(--radius);padding:15px 16px;font-weight:600;width:100%}
+  .field{background:var(--card);border:1px solid var(--line);border-radius:var(--r3);padding:14px 16px;width:100%;font-size:16px;outline:none;color:var(--ink)}
+  .field::placeholder{color:var(--muted)}
+  .field:focus{border-color:var(--teal)}
+  .primary{background:var(--teal);color:var(--on-accent);border-radius:var(--r3);padding:15px 16px;font-weight:700;width:100%}
   .primary:disabled{opacity:.5}
-  .error{color:#B3261E;font-size:15px;min-height:1.2em}
+  .error{color:var(--salmon-ink);font-size:14px;min-height:1.2em}
 
   /* ---------- app shell ---------- */
   #app{display:none;min-height:100dvh;flex-direction:column}
-  main{flex:1;padding:calc(var(--pad) + env(safe-area-inset-top)) var(--pad) 170px}
+  main{flex:1;padding:calc(14px + env(safe-area-inset-top)) var(--pad) 210px;max-width:640px;width:100%;margin:0 auto}
   .screen{display:none}.screen.active{display:block}
-  .heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:8px 0 18px}
-  .heading h1{font-size:34px;font-weight:700;letter-spacing:-.03em;margin:0}
-  .heading .sub{color:var(--muted);font-size:15px}
-  .heading button{color:var(--muted);font-size:15px}
+  .heading{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:6px 0 16px}
+  .heading h1{font-size:28px;font-weight:600}
+  .heading .kicker{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px}
+  .heading .sub{color:var(--muted);font-size:13px;font-weight:600}
+  .ghost{height:40px;padding:0 14px;border-radius:var(--r3);border:1px solid var(--line);background:var(--card);font-size:13px;font-weight:700;color:var(--ink);display:inline-flex;align-items:center;gap:6px}
+  .ghost.icon{width:40px;padding:0;justify-content:center}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:700;font-size:18px}
+  .brand .mark{width:30px;height:30px;border-radius:9px;background:#0A0A0C;display:flex;align-items:center;justify-content:center}
+  .brand .mark svg{width:22px;height:22px}
+
+  /* ---------- grids & cards ---------- */
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:10px;color:inherit}
+  .card.tint-teal{background:var(--teal-tint);border-color:transparent}
+  .card.tint-salmon{background:var(--salmon-tint);border-color:transparent}
+  .card.tile{justify-content:space-between;min-height:120px;text-align:left;width:100%}
+  .card.tile .big{font-family:var(--display);font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1}
+  .card.tile .lbl{font-size:13px;font-weight:600;margin-top:2px}
+  .tint-teal .big{color:var(--teal-ink)} .tint-salmon .big{color:var(--salmon-ink)}
+  .card .top{display:flex;align-items:center;justify-content:space-between}
+  .card .top .chev{color:var(--muted)}
+  .iconbox{width:40px;height:40px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex:none}
+  .iconbox.teal{background:var(--teal-tint);color:var(--teal)} .iconbox.salmon{background:var(--salmon-tint);color:var(--salmon)}
+  .section{display:flex;align-items:center;justify-content:space-between;margin:20px 0 12px}
+  .section h2{font-size:16px;font-weight:600}
+  .section a,.section button{font-size:13px;font-weight:700;color:var(--teal-ink)}
+  .empty{color:var(--muted);padding:26px 4px;text-align:center;font-size:14px}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:999px;background:var(--card2);font-size:11px;font-weight:700;color:var(--ink);max-width:100%}
+  .pill .dot{width:6px;height:6px;border-radius:50%;flex:none}
+  .pill span.t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
   /* ---------- to-dos ---------- */
-  .group{margin-bottom:22px}
-  .group h2{font-size:14px;font-weight:600;color:var(--muted);margin:0 0 8px}
-  .todo{display:flex;align-items:flex-start;gap:14px;background:var(--surface);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;border:1px solid var(--line)}
-  .todo .check{flex:0 0 26px;height:26px;width:26px;border-radius:50%;border:2px solid var(--muted);margin-top:1px;transition:background .15s,border-color .15s}
-  .todo.done .check{background:var(--accent);border-color:var(--accent);
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5 9-10'/%3E%3C/svg%3E");
-    background-size:16px;background-position:center;background-repeat:no-repeat}
-  .todo .text{flex:1;word-break:break-word}
-  .todo.done .text{color:var(--done);text-decoration:line-through}
-  .todo .meta{display:block;font-size:13px;color:var(--muted);margin-top:2px}
-  .todo .del{color:var(--muted);font-size:22px;line-height:1;padding:0 2px}
-  .empty{color:var(--muted);padding:26px 4px;text-align:center}
+  #todoCard{grid-column:span 2}
+  #todoCard h2{font-size:16px;font-weight:600}
+  .todo{display:flex;align-items:flex-start;gap:10px;padding:2px 0}
+  .todo .check{flex:0 0 22px;height:22px;width:22px;border-radius:7px;border:2px solid var(--muted);margin-top:1px;transition:background .15s,border-color .15s}
+  .todo.done .check{background:var(--teal);border-color:var(--teal);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230A0A0C' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5 9-10'/%3E%3C/svg%3E");
+    background-size:14px;background-position:center;background-repeat:no-repeat}
+  .todo .text{flex:1;word-break:break-word;font-size:14px;font-weight:500;line-height:1.35}
+  .todo.done .text{color:var(--muted);text-decoration:line-through}
+  .todo .meta{display:block;font-size:11px;color:var(--muted);margin-top:1px;font-weight:600}
+  .todo .del{color:var(--muted);font-size:20px;line-height:1;padding:0 2px;opacity:.7}
+  .todo-group h3{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:6px 0 6px}
+  .left{font-size:12px;font-weight:700;color:var(--teal-ink)}
 
-  /* ---------- inbox ---------- */
-  .item{display:block;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;text-decoration:none;color:inherit}
-  .item .cat{font-size:13px;color:var(--accent);font-weight:600}
-  .item .title{font-weight:600;margin:2px 0}
-  .item .note{font-size:15px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .item .when{font-size:13px;color:var(--muted);margin-top:6px}
+  /* ---------- items (inbox / library / search) ---------- */
+  .items{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .item{display:flex;flex-direction:column;justify-content:space-between;gap:8px;aspect-ratio:1/1;padding:14px;border-radius:22px;
+    background:var(--card);border:1px solid var(--line);color:inherit;overflow:hidden;text-decoration:none}
+  .item .row{display:flex;align-items:center;justify-content:space-between;gap:6px}
+  .item .when{font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap}
+  .item .cat{font-size:11px;font-weight:700;color:var(--teal-ink);text-transform:uppercase;letter-spacing:.06em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .item .title{font-size:14px;font-weight:700;line-height:1.25;letter-spacing:-.01em;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .item .note{font-size:12px;color:var(--muted);line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .item .body{display:flex;flex-direction:column;gap:3px;min-height:0}
+  .item .author{font-size:11px;font-weight:600;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .sources .items{margin:-2px 0 16px}
 
   /* ---------- library ---------- */
-  .catrow{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:15px 16px;margin-bottom:8px;width:100%;text-align:left}
-  .catrow .name{font-weight:600}
-  .catrow .count{color:var(--muted);font-size:15px}
-  .chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .stat{padding:12px;border-radius:var(--r2);min-height:84px;display:flex;flex-direction:column;justify-content:space-between;background:var(--card);border:1px solid var(--line)}
+  .stat .n{font-family:var(--display);font-size:22px;font-weight:700;line-height:1}
+  .stat .l{font-size:11px;font-weight:600;color:var(--muted)}
+  .stat.teal{background:var(--teal-tint);border-color:transparent}.stat.teal .n{color:var(--teal-ink)}.stat.teal .l{color:var(--ink)}
+  .stat.salmon{background:var(--salmon-tint);border-color:transparent}.stat.salmon .n{color:var(--salmon-ink)}.stat.salmon .l{color:var(--ink)}
+  .cat-tile{aspect-ratio:1/1;justify-content:space-between;text-align:left;width:100%}
+  .cat-tile .name{font-family:var(--display);font-size:16px;font-weight:600;letter-spacing:-.01em;line-height:1.2}
+  .cat-tile .count{font-size:12px;font-weight:600;color:var(--muted);margin-top:2px}
+  .chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 14px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   .chips::-webkit-scrollbar{display:none}
-  .chips button{flex:0 0 auto;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:15px;color:var(--muted);white-space:nowrap}
-  .chips button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
-  .back{color:var(--accent);font-size:16px;font-weight:500;margin-bottom:6px;display:inline-block}
+  .chips button{flex:0 0 auto;height:36px;padding:0 14px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap}
+  .chips button.on{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:700}
+  .back{display:inline-flex;align-items:center;gap:4px;height:40px;padding:0 14px 0 10px;border-radius:var(--r3);border:1px solid var(--line);background:var(--card);font-size:13px;font-weight:700;color:var(--ink);margin-bottom:12px}
 
   /* ---------- ask ---------- */
-  .msg{max-width:88%;padding:12px 16px;border-radius:18px;margin-bottom:10px;white-space:pre-wrap;word-break:break-word;line-height:1.45}
-  .msg.me{background:var(--ink);color:#fff;margin-left:auto;border-bottom-right-radius:6px}
-  .msg.ai{background:var(--surface);border:1px solid var(--line);border-bottom-left-radius:6px}
+  .msg{max-width:88%;padding:12px 16px;border-radius:20px;margin-bottom:10px;white-space:pre-wrap;word-break:break-word;line-height:1.45;font-size:15px}
+  .msg.me{background:var(--teal);color:var(--on-accent);margin-left:auto;border-bottom-right-radius:6px;font-weight:500}
+  .msg.ai{background:var(--card);border:1px solid var(--line);border-bottom-left-radius:6px}
   .msg.ai.thinking{color:var(--muted)}
-  .sources{margin:-2px 0 16px}
-  .sources .item{padding:10px 14px}
-  .sources .item .title{font-size:15px}
-  .starters{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-  .starters button{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:9px 14px;font-size:15px;color:var(--ink)}
+  .starters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:8px}
+  .starters button{background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:14px;font-size:13px;font-weight:600;color:var(--ink);text-align:left;min-height:76px;display:flex;flex-direction:column;justify-content:space-between;gap:8px}
+  .starters button svg{color:var(--salmon)}
 
   /* ---------- bottom bar ---------- */
-  #bar{position:fixed;left:0;right:0;bottom:0;padding:10px var(--pad) calc(12px + env(safe-area-inset-bottom));
-    background:linear-gradient(to top,var(--bg) 70%,rgba(243,245,248,0));}
-  .tabs{display:flex;gap:8px;margin-bottom:10px}
-  .tabs button{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:10px 0;font-size:15px;font-weight:500;color:var(--muted)}
-  .tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-  .composer{display:flex;gap:8px}
-  .composer input{flex:1}
-  .composer button{background:var(--accent);color:#fff;border-radius:var(--radius);padding:0 18px;font-weight:600}
+  #bar{position:fixed;left:0;right:0;bottom:0;padding:12px var(--pad) calc(10px + env(safe-area-inset-bottom));
+    background:var(--bar);border-top:1px solid var(--line);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
+  #bar .inner{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+  .composer{display:flex;align-items:center;gap:8px;height:54px;padding:0 8px 0 18px;border-radius:20px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow)}
+  .composer>svg{color:var(--teal)}
+  .composer input{flex:1;min-width:0;height:40px;border:0;background:transparent;font-size:15px;outline:none;color:var(--ink)}
+  .composer input::placeholder{color:var(--muted)}
+  .composer button{width:40px;height:40px;border-radius:14px;background:var(--teal);color:var(--on-accent);display:flex;align-items:center;justify-content:center;flex:none}
   .composer button:disabled{opacity:.5}
+  .tabs{display:flex;justify-content:space-between;padding:0 4px}
+  .tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;width:64px;height:50px;border-radius:16px;color:var(--muted);font-size:11px;font-weight:600}
+  .tabs button.on{background:var(--teal-tint);color:var(--teal)}
 
-  .toast{position:fixed;left:50%;transform:translateX(-50%);top:14px;background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;font-size:15px;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast{position:fixed;left:50%;transform:translateX(-50%);top:calc(14px + env(safe-area-inset-top));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
   .toast.show{opacity:1}
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
+
+<!-- brain mark, reused everywhere -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="brain" viewBox="0 0 200 200">
+    <g fill="#2FD9C4"><circle cx="72" cy="92" r="34"/><circle cx="102" cy="72" r="34"/><circle cx="132" cy="80" r="30"/><circle cx="152" cy="104" r="26"/><circle cx="86" cy="122" r="30"/><circle cx="118" cy="120" r="28"/><circle cx="140" cy="118" r="22"/><ellipse cx="146" cy="142" rx="22" ry="14"/><rect x="118" y="132" width="16" height="36" rx="7" transform="rotate(-18 126 150)"/></g>
+    <g stroke="#0A0A0C" stroke-width="6" stroke-linecap="round" fill="none"><path d="M58 84 C70 80 78 88 80 100"/><path d="M96 56 C100 68 96 80 88 88"/><path d="M118 62 C124 74 120 86 110 92"/><path d="M70 120 C80 112 92 116 98 126"/><path d="M112 104 C122 100 132 106 136 116"/><path d="M150 90 C156 100 152 110 144 114"/><path d="M130 138 C138 132 150 134 158 140"/></g>
+  </symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-6h4v6"/></symbol>
+  <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M3 12h5l2 3h4l2-3h5"/><path d="M5 5h14l2 7v7H3v-7z"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></symbol>
+  <symbol id="i-chef" viewBox="0 0 24 24"><path d="M7 11a4 4 0 0 1 1-8 4 4 0 0 1 8 0 4 4 0 0 1 1 8v9H7z"/><path d="M7 16h10"/></symbol>
+  <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M9.5 10.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/></symbol>
+  <symbol id="i-dumbbell" viewBox="0 0 24 24"><path d="M3 10v4M6 8v8M18 8v8M21 10v4M6 12h12"/></symbol>
+  <symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="12" rx="2"/><path d="M3 13h18M12 9v12M12 9c-3 0-5-2-5-4a2 2 0 0 1 4 0zM12 9c3 0 5-2 5-4a2 2 0 0 0-4 0z"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></symbol>
+  <symbol id="i-game" viewBox="0 0 24 24"><path d="M6 8h12a4 4 0 0 1 4 4v3a3 3 0 0 1-5 2l-2-2H9l-2 2a3 3 0 0 1-5-2v-3a4 4 0 0 1 4-4z"/><path d="M8 11v3M6.5 12.5h3M16 12h.01M18 14h.01"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11z"/><circle cx="12" cy="10" r="2"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3h9l5 5v13H6z"/><path d="M14 3v6h6"/></symbol>
+  <symbol id="i-note" viewBox="0 0 24 24"><path d="M6 3h9l5 5v13H6z"/><path d="M14 3v6h6M9 13h7M9 17h5"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-plane" viewBox="0 0 24 24"><path d="M2 12l20-8-6 18-3-8z"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></symbol>
+</svg>
 
 <!-- ===================== SETTINGS: paste your two Supabase values here ===================== -->
 <script>
@@ -109,6 +201,7 @@
 <!-- ========================================================================================= -->
 
 <section id="auth">
+  <div class="mark"><svg width="64" height="64"><use href="#brain"/></svg></div>
   <h1>Brain</h1>
   <p>Sign in to open your brain.</p>
   <input class="field" id="email" type="email" placeholder="Email" autocomplete="username" inputmode="email">
@@ -119,70 +212,101 @@
 
 <section id="app">
   <main>
+    <!-- ===== TODAY ===== -->
     <div class="screen active" id="today">
-      <div class="heading">
-        <div><h1 id="todayTitle">Today</h1><div class="sub" id="todayDate"></div></div>
-        <button id="signOut">Sign out</button>
+      <div class="heading" style="align-items:center">
+        <div class="brand"><span class="mark"><svg><use href="#brain"/></svg></span>Brain</div>
+        <button class="ghost" id="signOut">Sign out</button>
       </div>
-      <div id="todoList"></div>
+      <div class="heading" style="margin-top:0">
+        <div><div class="kicker" id="todayDate"></div><h1 id="todayTitle">Good evening</h1></div>
+      </div>
+
+      <div class="grid">
+        <section class="card" id="todoCard">
+          <div class="top"><span class="iconbox teal"><svg class="i"><use href="#i-check"/></svg></span><span class="left" id="todoLeft"></span></div>
+          <h2>Today’s to-dos</h2>
+          <div id="todoList"></div>
+        </section>
+        <button class="card tile tint-salmon" data-go="inbox">
+          <div class="top"><svg class="i" style="color:var(--salmon)"><use href="#i-inbox"/></svg><svg class="i chev"><use href="#i-chev"/></svg></div>
+          <div><div class="big" id="inboxBig">–</div><div class="lbl">recent saves</div></div>
+        </button>
+        <button class="card tile tint-teal" data-go="library">
+          <div class="top"><svg class="i" style="color:var(--teal)"><use href="#i-grid"/></svg><svg class="i chev"><use href="#i-chev"/></svg></div>
+          <div><div class="big" id="libBig">–</div><div class="lbl">in Library</div></div>
+        </button>
+      </div>
+
+      <div class="section"><h2>Saved recently</h2><button data-go="inbox">See all</button></div>
+      <div class="items" id="recentItems"></div>
     </div>
 
+    <!-- ===== INBOX ===== -->
     <div class="screen" id="inbox">
       <div class="heading">
-        <div><h1>Inbox</h1><div class="sub" id="inboxCount"></div></div>
-        <button id="refreshInbox">Refresh</button>
+        <div><div class="kicker" id="inboxCount"></div><h1>Inbox</h1></div>
+        <button class="ghost" id="refreshInbox">Refresh</button>
       </div>
-      <div id="itemList"></div>
+      <div class="items" id="itemList"></div>
     </div>
 
+    <!-- ===== LIBRARY ===== -->
     <div class="screen" id="library">
       <div id="libCats">
-        <div class="heading"><div><h1>Library</h1><div class="sub" id="libCount"></div></div></div>
-        <div id="catList"></div>
+        <div class="heading"><div><div class="kicker" id="libCount"></div><h1>Library</h1></div></div>
+        <div class="grid3" id="sourceStats"></div>
+        <div class="section"><h2>Categories</h2></div>
+        <div class="grid" id="catList"></div>
       </div>
       <div id="libCat" style="display:none">
-        <button class="back" id="libBack">‹ All categories</button>
-        <div class="heading"><div><h1 id="libCatTitle"></h1><div class="sub" id="libCatCount"></div></div></div>
+        <button class="back" id="libBack"><svg class="i" style="transform:scaleX(-1);width:18px;height:18px"><use href="#i-chev"/></svg>All categories</button>
+        <div class="heading"><div><div class="kicker" id="libCatCount"></div><h1 id="libCatTitle"></h1></div></div>
         <div class="chips" id="subChips"></div>
-        <div id="catItems"></div>
+        <div class="items" id="catItems"></div>
       </div>
       <div id="libSearch" style="display:none">
-        <div class="heading"><div><h1>Search</h1><div class="sub" id="searchCount"></div></div></div>
-        <div id="searchItems"></div>
+        <div class="heading"><div><div class="kicker" id="searchCount"></div><h1>Search</h1></div></div>
+        <div class="items" id="searchItems"></div>
       </div>
     </div>
 
+    <!-- ===== ASK ===== -->
     <div class="screen" id="ask">
-      <div class="heading"><div><h1>Ask</h1><div class="sub">Questions answered from your saves</div></div><button id="clearChat">Clear</button></div>
+      <div class="heading"><div><div class="kicker">Answered from your saves</div><h1>Ask</h1></div><button class="ghost" id="clearChat">Clear</button></div>
       <div id="chat"></div>
       <div id="starters" class="starters">
-        <button>What recipes have I saved?</button>
-        <button>Places to visit in Vietnam</button>
-        <button>Dumbbell exercises I saved</button>
-        <button>Any iPhone tricks?</button>
+        <button><svg class="i"><use href="#i-chef"/></svg>What recipes have I saved?</button>
+        <button><svg class="i"><use href="#i-pin"/></svg>Places to visit in Vietnam</button>
+        <button><svg class="i"><use href="#i-dumbbell"/></svg>Dumbbell exercises I saved</button>
+        <button><svg class="i"><use href="#i-phone"/></svg>Any iPhone tricks?</button>
       </div>
     </div>
   </main>
 
-  <div id="bar">
-    <div class="tabs">
-      <button data-tab="today" class="on">Today</button>
-      <button data-tab="inbox">Inbox</button>
-      <button data-tab="library">Library</button>
-      <button data-tab="ask">Ask</button>
-    </div>
+  <!-- ===== BOTTOM BAR ===== -->
+  <div id="bar"><div class="inner">
     <div class="composer" id="composer">
-      <input class="field" id="newTodo" placeholder="Add a to-do for today" enterkeyhint="done">
-      <button id="addTodo">Add</button>
+      <svg class="i"><use href="#i-plus"/></svg>
+      <input id="newTodo" placeholder="Add a to-do for today" enterkeyhint="done">
+      <button id="addTodo" aria-label="Add to-do"><svg class="i"><use href="#i-check"/></svg></button>
     </div>
     <div class="composer" id="searchBar" style="display:none">
-      <input class="field" id="searchBox" type="search" placeholder="Search your brain" enterkeyhint="search" autocomplete="off">
+      <svg class="i"><use href="#i-search"/></svg>
+      <input id="searchBox" type="search" placeholder="Search your brain" enterkeyhint="search" autocomplete="off">
     </div>
     <div class="composer" id="askBar" style="display:none">
-      <input class="field" id="askBox" placeholder="Ask your brain" enterkeyhint="send" autocomplete="off">
-      <button id="askSend">Ask</button>
+      <svg class="i"><use href="#i-spark"/></svg>
+      <input id="askBox" placeholder="Ask your brain…" enterkeyhint="send" autocomplete="off">
+      <button id="askSend" aria-label="Ask"><svg class="i"><use href="#i-chev"/></svg></button>
     </div>
-  </div>
+    <div class="tabs">
+      <button data-tab="today" class="on"><svg class="i"><use href="#i-home"/></svg>Today</button>
+      <button data-tab="inbox"><svg class="i"><use href="#i-inbox"/></svg>Inbox</button>
+      <button data-tab="library"><svg class="i"><use href="#i-grid"/></svg>Library</button>
+      <button data-tab="ask"><svg class="i"><use href="#i-spark"/></svg>Ask</button>
+    </div>
+  </div></div>
 </section>
 
 <div class="toast" id="toast"></div>
@@ -198,7 +322,13 @@
   };
   const toast = msg => { const t=$("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1800); };
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  const niceDate = iso => new Date(iso).toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"});
+  const niceDate = iso => new Date(iso).toLocaleDateString(undefined,{day:"numeric",month:"short"});
+  const ago = iso => {
+    const m = Math.round((Date.now() - new Date(iso)) / 60000);
+    if (m < 60) return `${Math.max(m,1)}m`; if (m < 1440) return `${Math.round(m/60)}h`;
+    if (m < 10080) return `${Math.round(m/1440)}d`; return niceDate(iso);
+  };
+  const icon = (id, extra="") => `<svg class="i" ${extra}><use href="#${id}"/></svg>`;
 
   // ---------- auth ----------
   $("signIn").onclick = async () => {
@@ -218,18 +348,22 @@
   });
 
   // ---------- tabs ----------
-  document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => {
-    document.querySelectorAll(".tabs button").forEach(x => x.classList.toggle("on", x === b));
-    document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === b.dataset.tab));
-    $("composer").style.display = b.dataset.tab === "today" ? "flex" : "none";
-    $("searchBar").style.display = b.dataset.tab === "library" ? "flex" : "none";
-    $("askBar").style.display = b.dataset.tab === "ask" ? "flex" : "none";
+  function goTab(name) {
+    document.querySelectorAll(".tabs button").forEach(x => x.classList.toggle("on", x.dataset.tab === name));
+    document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === name));
+    $("composer").style.display = name === "today" ? "flex" : "none";
+    $("searchBar").style.display = name === "library" ? "flex" : "none";
+    $("askBar").style.display = name === "ask" ? "flex" : "none";
     window.scrollTo(0,0);
-  });
+  }
+  document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => goTab(b.dataset.tab));
+  document.querySelectorAll("[data-go]").forEach(b => b.onclick = () => goTab(b.dataset.go));
+
+  // ---------- today header ----------
+  $("todayDate").textContent = new Date().toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"short"});
+  { const h = new Date().getHours(); $("todayTitle").textContent = h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening"; }
 
   // ---------- to-dos ----------
-  $("todayDate").textContent = new Date().toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"});
-
   async function loadTodos() {
     const today = todayISO();
     // Unfinished to-dos from any day roll forward; finished ones show only for today.
@@ -237,9 +371,10 @@
       .or(`done.eq.false,and(done.eq.true,due_date.eq.${today})`)
       .order("done").order("due_date").order("created_at");
     if (error) { $("todoList").innerHTML = `<div class="empty">Couldn't load to-dos: ${esc(error.message)}</div>`; return; }
+    const open = data.filter(t => !t.done), done = data.filter(t => t.done);
+    $("todoLeft").textContent = open.length ? `${open.length} left` : (done.length ? "All done" : "");
     if (!data.length) { $("todoList").innerHTML = `<div class="empty">Nothing planned yet. Add your first to-do below.</div>`; return; }
 
-    const open = data.filter(t => !t.done), done = data.filter(t => t.done);
     const row = t => `
       <div class="todo ${t.done ? "done" : ""}" data-id="${t.id}">
         <button class="check" aria-label="Mark done"></button>
@@ -247,8 +382,8 @@
         <button class="del" aria-label="Delete">×</button>
       </div>`;
     $("todoList").innerHTML =
-      (open.length ? `<div class="group">${open.map(row).join("")}</div>` : "") +
-      (done.length ? `<div class="group"><h2>Done today</h2>${done.map(row).join("")}</div>` : "");
+      (open.length ? `<div class="todo-group">${open.map(row).join("")}</div>` : "") +
+      (done.length ? `<div class="todo-group"><h3>Done today</h3>${done.map(row).join("")}</div>` : "");
 
     document.querySelectorAll(".todo .check").forEach(b => b.onclick = async () => {
       const el = b.closest(".todo"), isDone = !el.classList.contains("done");
@@ -273,9 +408,10 @@
   $("addTodo").onclick = addTodo;
   $("newTodo").addEventListener("keydown", e => { if (e.key === "Enter") addTodo(); });
 
-  // ---------- items (shared by Inbox and Library) ----------
+  // ---------- items (shared by Today, Inbox and Library) ----------
   const ITEM_COLS = "id,url,source,category,subcategory,title,body,author,hashtags,ig_collection,folder,saved_at";
   const sourceName = s => ({instagram:"Instagram", web:"TikTok", tiktok:"TikTok", icloud:"iCloud", apple_notes:"Notes", notion:"Notion"}[s] || s || "");
+  const sourceColor = s => ({instagram:"#E1306C", web:"var(--teal)", tiktok:"var(--teal)", icloud:"#6B7CFF", apple_notes:"var(--salmon)", notion:"var(--ink)"}[s] || "var(--muted)");
   const tidy = s => (s || "").replace(/[-_]+/g, " ").trim();
   // "recipe", "Recipe" and "RECIPES" all share one key
   const key = s => tidy(s).toLowerCase().replace(/s$/, "");
@@ -289,6 +425,7 @@
     Object.entries(tally).forEach(([k, names]) => { displayName[k] = Object.entries(names).sort((a, b) => b[1] - a[1])[0][0]; });
   }
   const nice = n => n ? (displayName[key(n)] || n) : "";
+  const title = s => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : s;
 
   // Where an item sits in the Library: category + subcategory, with iCloud folders used as categories.
   function place(i) {
@@ -310,14 +447,16 @@
       link = "shareddocuments:///private/var/mobile/Library/Mobile%20Documents/com~apple~CloudDocs/" + encodeURI(path);
     }
     const p = place(i);
-    const cat = [nice(p.cat), nice(p.sub)].filter(Boolean).join(" / ");
+    const cat = [nice(p.cat), nice(p.sub)].filter(Boolean).join(" · ");
     const preview = i.body && i.body !== i.title ? i.body : "";
-    const meta = [sourceName(i.source), i.author ? "@" + i.author : "", i.saved_at ? niceDate(i.saved_at) : ""].filter(Boolean).join(" · ");
     const inner = `
-      ${cat ? `<div class="cat">${esc(cat)}</div>` : ""}
-      <div class="title">${esc(i.title || "Untitled")}</div>
-      ${preview ? `<div class="note">${esc(preview)}</div>` : ""}
-      <div class="when">${esc(meta)}</div>`;
+      <div class="row"><span class="pill"><span class="dot" style="background:${sourceColor(i.source)}"></span><span class="t">${esc(sourceName(i.source))}</span></span>${i.saved_at ? `<span class="when">${esc(ago(i.saved_at))}</span>` : ""}</div>
+      <div class="body">
+        ${cat ? `<div class="cat">${esc(cat)}</div>` : ""}
+        <div class="title">${esc(i.title || "Untitled")}</div>
+        ${preview ? `<div class="note">${esc(preview)}</div>` : ""}
+        ${i.author ? `<div class="author">@${esc(i.author)}</div>` : ""}
+      </div>`;
     return link ? `<a class="item" href="${esc(link)}" target="_blank" rel="noopener">${inner}</a>` : `<div class="item">${inner}</div>`;
   }
 
@@ -327,8 +466,10 @@
       .neq("source", "icloud").order("saved_at", { ascending: false }).limit(60);
     if (error) { $("itemList").innerHTML = `<div class="empty">Couldn't load items: ${esc(error.message)}</div>`; return; }
     $("inboxCount").textContent = data.length ? `Latest ${data.length} saves` : "";
-    if (!data.length) { $("itemList").innerHTML = `<div class="empty">Nothing saved yet. Share something with "Save to Brain" and it will appear here.</div>`; return; }
+    $("inboxBig").textContent = data.length;
+    if (!data.length) { $("itemList").innerHTML = `<div class="empty">Nothing saved yet. Share something with "Save to Brain" and it will appear here.</div>`; $("recentItems").innerHTML = ""; return; }
     $("itemList").innerHTML = data.map(renderItem).join("");
+    $("recentItems").innerHTML = data.slice(0, 4).map(renderItem).join("");
   }
 
   // ---------- library ----------
@@ -338,25 +479,55 @@
     if (error) { $("catList").innerHTML = `<div class="empty">Couldn't load your library: ${esc(error.message)}</div>`; return; }
     allItems = data; buildNames();
     $("libCount").textContent = `${data.length} items`;
+    $("libBig").textContent = data.length;
+    renderSources();
     renderCategories();
+  }
+
+  function renderSources() {
+    const c = {};
+    allItems.forEach(i => { const n = sourceName(i.source); c[n] = (c[n] || 0) + 1; });
+    const order = ["Instagram", "TikTok", "Notes", "iCloud", "Notion"].filter(n => c[n]);
+    const tone = { Instagram: "teal", TikTok: "salmon" };
+    $("sourceStats").innerHTML = order.map(n => `<div class="stat ${tone[n] || ""}"><span class="n">${c[n]}</span><span class="l">${n}</span></div>`).join("");
+  }
+
+  // Pick an icon from the category name
+  function catIcon(name) {
+    const n = name.toLowerCase();
+    if (/recipe|food|cook|meal/.test(n)) return ["i-chef", "salmon"];
+    if (/ai|prompt|claude|chatgpt/.test(n)) return ["i-spark", "teal"];
+    if (/hustle|business|money|invest/.test(n)) return ["i-coin", "teal"];
+    if (/exercis|workout|gym|fitness|yoga/.test(n)) return ["i-dumbbell", "salmon"];
+    if (/gift|diy|craft/.test(n)) return ["i-gift", "teal"];
+    if (/iphone|phone|setting|tech|app/.test(n)) return ["i-phone", "salmon"];
+    if (/game|social/.test(n)) return ["i-game", "teal"];
+    if (/place|travel|trip|visit|restaurant|cafe|hotel/.test(n)) return ["i-pin", "salmon"];
+    if (/file|document|pdf/.test(n)) return ["i-file", "teal"];
+    if (/note/.test(n)) return ["i-note", "salmon"];
+    if (/uncategorised/.test(n)) return ["i-folder", "teal"];
+    return ["i-heart", "salmon"];
   }
 
   function renderCategories() {
     const counts = {};
     allItems.forEach(i => { const c = nice(place(i).cat); counts[c] = (counts[c] || 0) + 1; });
-    const names = Object.keys(counts).sort((a, b) => a === "Uncategorised" ? 1 : b === "Uncategorised" ? -1 : a.localeCompare(b));
-    $("catList").innerHTML = names.map(n => `
-      <button class="catrow" data-cat="${esc(n)}"><span class="name">${esc(n)}</span><span class="count">${counts[n]}</span></button>`).join("");
-    document.querySelectorAll(".catrow").forEach(b => b.onclick = () => openCategory(b.dataset.cat));
+    const names = Object.keys(counts).sort((a, b) => a === "Uncategorised" ? 1 : b === "Uncategorised" ? -1 : counts[b] - counts[a]);
+    $("catList").innerHTML = names.map(n => { const [ic, tone] = catIcon(n); return `
+      <button class="card cat-tile" data-cat="${esc(n)}">
+        <span class="iconbox ${tone}">${icon(ic)}</span>
+        <span><span class="name" style="display:block">${esc(title(n))}</span><span class="count" style="display:block">${counts[n]} item${counts[n] === 1 ? "" : "s"}</span></span>
+      </button>`; }).join("");
+    document.querySelectorAll(".cat-tile").forEach(b => b.onclick = () => openCategory(b.dataset.cat));
   }
 
   function openCategory(cat) {
     const items = allItems.filter(i => key(place(i).cat) === key(cat));
     const subs = [...new Set(items.map(i => nice(place(i).sub)).filter(Boolean))].sort();
-    $("libCatTitle").textContent = cat;
+    $("libCatTitle").textContent = title(cat);
     $("libCatCount").textContent = `${items.length} items`;
     $("subChips").innerHTML = subs.length
-      ? [`<button class="on" data-sub="">All</button>`, ...subs.map(s => `<button data-sub="${esc(s)}">${esc(s)}</button>`)].join("") : "";
+      ? [`<button class="on" data-sub="">All</button>`, ...subs.map(s => `<button data-sub="${esc(s)}">${esc(title(s))}</button>`)].join("") : "";
     const show = sub => {
       const list = sub ? items.filter(i => key(place(i).sub) === key(sub)) : items;
       $("catItems").innerHTML = list.map(renderItem).join("");
@@ -383,6 +554,7 @@
     $("searchItems").innerHTML = hit.length ? hit.slice(0, 100).map(renderItem).join("") : `<div class="empty">Nothing matches "${esc(q)}".</div>`;
     $("libCats").style.display = "none"; $("libCat").style.display = "none"; $("libSearch").style.display = "block";
   });
+
   // ---------- ask ----------
   let history = [];
   function addMsg(role, text, cls = "") {
@@ -396,14 +568,14 @@
     addMsg("me", q);
     const wait = addMsg("ai", "Looking through your brain…", "thinking");
     try {
-            const { data: out, error } = await sb.functions.invoke("swift-service", { body: { question: q, history } });
+      const { data: out, error } = await sb.functions.invoke("swift-service", { body: { question: q, history } });
       if (error) throw new Error(error.message || "Function error");
       if (!out || out.error) throw new Error((out && out.error) || "No answer returned");
       wait.classList.remove("thinking"); wait.textContent = out.answer;
       history.push({ role: "user", content: q }, { role: "assistant", content: out.answer });
       if (out.sources && out.sources.length) {
         const src = document.createElement("div"); src.className = "sources";
-        src.innerHTML = out.sources.map(renderItem).join(""); $("chat").appendChild(src);
+        src.innerHTML = `<div class="items">${out.sources.map(renderItem).join("")}</div>`; $("chat").appendChild(src);
       }
     } catch (e) {
       wait.classList.remove("thinking"); wait.textContent = "Couldn't get an answer: " + e.message;
@@ -412,8 +584,8 @@
   }
   $("askSend").onclick = () => ask($("askBox").value);
   $("askBox").addEventListener("keydown", e => { if (e.key === "Enter") ask($("askBox").value); });
-  document.querySelectorAll("#starters button").forEach(b => b.onclick = () => ask(b.textContent));
-  $("clearChat").onclick = () => { history = []; $("chat").innerHTML = ""; $("starters").style.display = "flex"; };
+  document.querySelectorAll("#starters button").forEach(b => b.onclick = () => ask(b.textContent.trim()));
+  $("clearChat").onclick = () => { history = []; $("chat").innerHTML = ""; $("starters").style.display = "grid"; };
 
   $("refreshInbox").onclick = () => { loadInbox(); toast("Refreshed"); };
 </script>
