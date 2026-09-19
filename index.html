@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F3F5F8">
+<title>Brain</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+  :root{
+    --bg:#F3F5F8; --surface:#FFFFFF; --ink:#18212B; --muted:#6C7787;
+    --line:#E1E6EC; --accent:#2B6C86; --accent-ink:#FFFFFF; --done:#9AA6B4;
+    --pad:18px; --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;font-size:17px;line-height:1.4}
+  button,input{font:inherit;color:inherit}
+  button{background:none;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  a{color:var(--accent)}
+
+  /* ---------- sign in ---------- */
+  #auth{min-height:100dvh;display:flex;flex-direction:column;justify-content:center;padding:var(--pad);gap:14px;max-width:420px;margin:0 auto}
+  #auth h1{font-size:44px;font-weight:700;letter-spacing:-.03em;margin:0 0 6px}
+  #auth p{margin:0 0 10px;color:var(--muted)}
+  .field{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;width:100%;font-size:17px;outline:none}
+  .field:focus{border-color:var(--accent)}
+  .primary{background:var(--accent);color:var(--accent-ink);border-radius:var(--radius);padding:15px 16px;font-weight:600;width:100%}
+  .primary:disabled{opacity:.5}
+  .error{color:#B3261E;font-size:15px;min-height:1.2em}
+
+  /* ---------- app shell ---------- */
+  #app{display:none;min-height:100dvh;flex-direction:column}
+  main{flex:1;padding:calc(var(--pad) + env(safe-area-inset-top)) var(--pad) 170px}
+  .screen{display:none}.screen.active{display:block}
+  .heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:8px 0 18px}
+  .heading h1{font-size:34px;font-weight:700;letter-spacing:-.03em;margin:0}
+  .heading .sub{color:var(--muted);font-size:15px}
+  .heading button{color:var(--muted);font-size:15px}
+
+  /* ---------- to-dos ---------- */
+  .group{margin-bottom:22px}
+  .group h2{font-size:14px;font-weight:600;color:var(--muted);margin:0 0 8px}
+  .todo{display:flex;align-items:flex-start;gap:14px;background:var(--surface);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;border:1px solid var(--line)}
+  .todo .check{flex:0 0 26px;height:26px;width:26px;border-radius:50%;border:2px solid var(--muted);margin-top:1px;transition:background .15s,border-color .15s}
+  .todo.done .check{background:var(--accent);border-color:var(--accent);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5 9-10'/%3E%3C/svg%3E");
+    background-size:16px;background-position:center;background-repeat:no-repeat}
+  .todo .text{flex:1;word-break:break-word}
+  .todo.done .text{color:var(--done);text-decoration:line-through}
+  .todo .meta{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+  .todo .del{color:var(--muted);font-size:22px;line-height:1;padding:0 2px}
+  .empty{color:var(--muted);padding:26px 4px;text-align:center}
+
+  /* ---------- inbox ---------- */
+  .item{display:block;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;text-decoration:none;color:inherit}
+  .item .cat{font-size:13px;color:var(--accent);font-weight:600}
+  .item .title{font-weight:600;margin:2px 0}
+  .item .note{font-size:15px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .item .when{font-size:13px;color:var(--muted);margin-top:6px}
+
+  /* ---------- bottom bar ---------- */
+  #bar{position:fixed;left:0;right:0;bottom:0;padding:10px var(--pad) calc(12px + env(safe-area-inset-bottom));
+    background:linear-gradient(to top,var(--bg) 70%,rgba(243,245,248,0));}
+  .tabs{display:flex;gap:8px;margin-bottom:10px}
+  .tabs button{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:10px 0;font-size:15px;font-weight:500;color:var(--muted)}
+  .tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .composer{display:flex;gap:8px}
+  .composer input{flex:1}
+  .composer button{background:var(--accent);color:#fff;border-radius:var(--radius);padding:0 18px;font-weight:600}
+  .composer button:disabled{opacity:.5}
+
+  .toast{position:fixed;left:50%;transform:translateX(-50%);top:14px;background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;font-size:15px;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- ===================== SETTINGS: paste your two Supabase values here ===================== -->
+<script>
+  const SUPABASE_URL = "PASTE_YOUR_PROJECT_URL_HERE";      // looks like https://xxxxxxxx.supabase.co
+  const SUPABASE_KEY = "PASTE_YOUR_ANON_PUBLISHABLE_KEY_HERE";
+</script>
+<!-- ========================================================================================= -->
+
+<section id="auth">
+  <h1>Brain</h1>
+  <p>Sign in to open your brain.</p>
+  <input class="field" id="email" type="email" placeholder="Email" autocomplete="username" inputmode="email">
+  <input class="field" id="password" type="password" placeholder="Password" autocomplete="current-password">
+  <div class="error" id="authError"></div>
+  <button class="primary" id="signIn">Sign in</button>
+</section>
+
+<section id="app">
+  <main>
+    <div class="screen active" id="today">
+      <div class="heading">
+        <div><h1 id="todayTitle">Today</h1><div class="sub" id="todayDate"></div></div>
+        <button id="signOut">Sign out</button>
+      </div>
+      <div id="todoList"></div>
+    </div>
+
+    <div class="screen" id="inbox">
+      <div class="heading">
+        <div><h1>Inbox</h1><div class="sub" id="inboxCount"></div></div>
+        <button id="refreshInbox">Refresh</button>
+      </div>
+      <div id="itemList"></div>
+    </div>
+
+    <div class="screen" id="library">
+      <div class="heading"><div><h1>Library</h1><div class="sub">Coming next</div></div></div>
+      <div class="empty">Browse everything by category. We'll build this next.</div>
+    </div>
+
+    <div class="screen" id="ask">
+      <div class="heading"><div><h1>Ask</h1><div class="sub">Coming later</div></div></div>
+      <div class="empty">Chat with your brain. We'll build this after Library.</div>
+    </div>
+  </main>
+
+  <div id="bar">
+    <div class="tabs">
+      <button data-tab="today" class="on">Today</button>
+      <button data-tab="inbox">Inbox</button>
+      <button data-tab="library">Library</button>
+      <button data-tab="ask">Ask</button>
+    </div>
+    <div class="composer" id="composer">
+      <input class="field" id="newTodo" placeholder="Add a to-do for today" enterkeyhint="done">
+      <button id="addTodo">Add</button>
+    </div>
+  </div>
+</section>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const $ = id => document.getElementById(id);
+
+  // ---------- helpers ----------
+  const todayISO = () => {
+    const d = new Date(); const p = n => String(n).padStart(2,"0");
+    return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
+  };
+  const toast = msg => { const t=$("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1800); };
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const niceDate = iso => new Date(iso).toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"});
+
+  // ---------- auth ----------
+  $("signIn").onclick = async () => {
+    $("authError").textContent = ""; $("signIn").disabled = true;
+    const { error } = await sb.auth.signInWithPassword({ email: $("email").value.trim(), password: $("password").value });
+    $("signIn").disabled = false;
+    if (error) $("authError").textContent = "That email or password didn't work.";
+  };
+  $("password").addEventListener("keydown", e => { if (e.key === "Enter") $("signIn").click(); });
+  $("signOut").onclick = () => sb.auth.signOut();
+
+  sb.auth.onAuthStateChange((_e, session) => {
+    const on = !!session;
+    $("auth").style.display = on ? "none" : "flex";
+    $("app").style.display = on ? "flex" : "none";
+    if (on) { loadTodos(); loadInbox(); }
+  });
+
+  // ---------- tabs ----------
+  document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => {
+    document.querySelectorAll(".tabs button").forEach(x => x.classList.toggle("on", x === b));
+    document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === b.dataset.tab));
+    $("composer").style.display = b.dataset.tab === "today" ? "flex" : "none";
+    window.scrollTo(0,0);
+  });
+
+  // ---------- to-dos ----------
+  $("todayDate").textContent = new Date().toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"});
+
+  async function loadTodos() {
+    const today = todayISO();
+    // Unfinished to-dos from any day roll forward; finished ones show only for today.
+    const { data, error } = await sb.from("todos").select("*")
+      .or(`done.eq.false,and(done.eq.true,due_date.eq.${today})`)
+      .order("done").order("due_date").order("created_at");
+    if (error) { $("todoList").innerHTML = `<div class="empty">Couldn't load to-dos: ${esc(error.message)}</div>`; return; }
+    if (!data.length) { $("todoList").innerHTML = `<div class="empty">Nothing planned yet. Add your first to-do below.</div>`; return; }
+
+    const open = data.filter(t => !t.done), done = data.filter(t => t.done);
+    const row = t => `
+      <div class="todo ${t.done ? "done" : ""}" data-id="${t.id}">
+        <button class="check" aria-label="Mark done"></button>
+        <div class="text">${esc(t.title)}${(!t.done && t.due_date < today) ? `<span class="meta">Carried over from ${niceDate(t.due_date)}</span>` : ""}</div>
+        <button class="del" aria-label="Delete">×</button>
+      </div>`;
+    $("todoList").innerHTML =
+      (open.length ? `<div class="group">${open.map(row).join("")}</div>` : "") +
+      (done.length ? `<div class="group"><h2>Done today</h2>${done.map(row).join("")}</div>` : "");
+
+    document.querySelectorAll(".todo .check").forEach(b => b.onclick = async () => {
+      const el = b.closest(".todo"), isDone = !el.classList.contains("done");
+      el.classList.toggle("done", isDone);
+      await sb.from("todos").update({ done: isDone, done_at: isDone ? new Date().toISOString() : null, due_date: isDone ? today : undefined }).eq("id", el.dataset.id);
+      loadTodos();
+    });
+    document.querySelectorAll(".todo .del").forEach(b => b.onclick = async () => {
+      const el = b.closest(".todo"); el.remove();
+      await sb.from("todos").delete().eq("id", el.dataset.id);
+    });
+  }
+
+  async function addTodo() {
+    const title = $("newTodo").value.trim(); if (!title) return;
+    $("addTodo").disabled = true;
+    const { error } = await sb.from("todos").insert({ title, due_date: todayISO() });
+    $("addTodo").disabled = false;
+    if (error) { toast("Couldn't add it: " + error.message); return; }
+    $("newTodo").value = ""; loadTodos(); toast("Added");
+  }
+  $("addTodo").onclick = addTodo;
+  $("newTodo").addEventListener("keydown", e => { if (e.key === "Enter") addTodo(); });
+
+  // ---------- inbox ----------
+  async function loadInbox() {
+    const { data, error } = await sb.from("items").select("*").order("created_at", { ascending: false }).limit(60);
+    if (error) { $("itemList").innerHTML = `<div class="empty">Couldn't load items: ${esc(error.message)}</div>`; return; }
+    $("inboxCount").textContent = data.length ? `Latest ${data.length} saves` : "";
+    if (!data.length) { $("itemList").innerHTML = `<div class="empty">Nothing saved yet. Share something with "Save to Brain" and it will appear here.</div>`; return; }
+    $("itemList").innerHTML = data.map(i => {
+      const link = i.url || i.link || "";
+      const cat = [i.category, i.subcategory].filter(Boolean).join(" · ");
+      const inner = `
+        ${cat ? `<div class="cat">${esc(cat)}</div>` : ""}
+        <div class="title">${esc(i.title || link || "Untitled")}</div>
+        ${i.note ? `<div class="note">${esc(i.note)}</div>` : ""}
+        <div class="when">${esc(i.source || "")}${i.source ? " · " : ""}${i.created_at ? niceDate(i.created_at) : ""}</div>`;
+      return link ? `<a class="item" href="${esc(link)}" target="_blank" rel="noopener">${inner}</a>` : `<div class="item">${inner}</div>`;
+    }).join("");
+  }
+  $("refreshInbox").onclick = () => { loadInbox(); toast("Refreshed"); };
+</script>
+</body>
+</html>
