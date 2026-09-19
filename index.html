@@ -397,7 +397,7 @@
     const wait = addMsg("ai", "Looking through your brain…", "thinking");
     try {
       const { data: { session } } = await sb.auth.getSession();
-      const r = await fetch(`${SUPABASE_URL}/functions/v1/ask`, {
+      const r = await fetch(`${SUPABASE_URL}/functions/v1/ask-function`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${session.access_token}` },
         body: JSON.stringify({ question: q, history })
