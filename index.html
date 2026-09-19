@@ -261,7 +261,8 @@
     if (i.source === "icloud") {
       const parts = (i.folder || "").split("/").filter(Boolean);
       if (parts[0] && /icloud/i.test(parts[0])) parts.shift();
-      return { cat: parts[0] ? tidy(parts[0]) : "Files", sub: parts.slice(1).map(tidy).join(" / ") };
+      parts.pop(); // last part is the file name, not a folder
+      return { cat: parts[0] ? tidy(parts[0]) : "Files", sub: parts[1] ? tidy(parts[1]) : "" };
     }
     const cat = tidy(i.category) || tidy(i.ig_collection) || "Uncategorised";
     return { cat, sub: tidy(i.subcategory) };
