@@ -76,7 +76,7 @@
   .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:10px;color:inherit}
   .card.tint-teal{background:var(--teal-tint);border-color:transparent}
   .card.tint-salmon{background:var(--salmon-tint);border-color:transparent}
-  .card.tile{justify-content:space-between;min-height:120px;text-align:left;width:100%}
+  .card.tile{justify-content:space-between;min-height:96px;text-align:left;width:100%}
   .card.tile .big{font-family:var(--display);font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1}
   .card.tile .lbl{font-size:13px;font-weight:600;margin-top:2px}
   .tint-teal .big{color:var(--teal-ink)} .tint-salmon .big{color:var(--salmon-ink)}
@@ -108,13 +108,14 @@
   .left{font-size:12px;font-weight:700;color:var(--teal-ink)}
 
   /* ---------- items (inbox / library / search) ---------- */
-  .items{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-  .item{display:flex;flex-direction:column;justify-content:space-between;gap:8px;aspect-ratio:1/1;padding:14px;border-radius:22px;
+  .items{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start}
+  .pill.check{background:var(--salmon-tint);color:var(--salmon-ink)}
+  .item{display:flex;flex-direction:column;justify-content:flex-start;gap:6px;padding:12px;border-radius:18px;
     background:var(--card);border:1px solid var(--line);color:inherit;overflow:hidden;text-decoration:none}
   .item .row{display:flex;align-items:center;justify-content:space-between;gap:6px}
   .item .when{font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap}
   .item .cat{font-size:11px;font-weight:700;color:var(--teal-ink);text-transform:uppercase;letter-spacing:.06em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .item .title{font-size:14px;font-weight:700;line-height:1.25;letter-spacing:-.01em;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .item .title{font-size:14px;font-weight:700;line-height:1.25;letter-spacing:-.01em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .item .note{font-size:12px;color:var(--muted);line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .item .body{display:flex;flex-direction:column;gap:3px;min-height:0}
   .item .author{font-size:11px;font-weight:600;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -126,7 +127,7 @@
   .stat .l{font-size:11px;font-weight:600;color:var(--muted)}
   .stat.teal{background:var(--teal-tint);border-color:transparent}.stat.teal .n{color:var(--teal-ink)}.stat.teal .l{color:var(--ink)}
   .stat.salmon{background:var(--salmon-tint);border-color:transparent}.stat.salmon .n{color:var(--salmon-ink)}.stat.salmon .l{color:var(--ink)}
-  .cat-tile{aspect-ratio:1/1;justify-content:space-between;text-align:left;width:100%}
+  .cat-tile{flex-direction:row;align-items:center;gap:12px;padding:12px;text-align:left;width:100%;border-radius:18px}
   .cat-tile .name{font-family:var(--display);font-size:16px;font-weight:600;letter-spacing:-.01em;line-height:1.2}
   .cat-tile .count{font-size:12px;font-weight:600;color:var(--muted);margin-top:2px}
   .chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 14px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
@@ -140,7 +141,14 @@
   .chiplabel{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:2px 0 8px}
   .chips button .n{font-weight:600;color:var(--muted);margin-left:5px;font-size:12px}
   .chips button.on .n{color:inherit;opacity:.7}
-  .item.place{cursor:pointer;text-align:left;width:100%}
+  .item.place{cursor:pointer;text-align:left;width:100%;padding:0;gap:0;align-self:stretch}
+  .item.place .pic{aspect-ratio:4/3;width:100%;background:var(--teal-tint);display:flex;align-items:center;justify-content:center;font-size:34px;overflow:hidden;position:relative}
+  .item.place .pic.alt{background:var(--salmon-tint)}
+  .item.place .pic img{width:100%;height:100%;object-fit:cover;display:block}
+  .item.place .pic .been{position:absolute;top:8px;right:8px;background:var(--card);padding:3px 8px;border-radius:999px}
+  .item.place .txt{padding:10px 12px 12px;display:flex;flex-direction:column;gap:3px}
+  #sheet .hero{margin:0 calc(-1 * var(--pad)) 14px;aspect-ratio:16/10;overflow:hidden;background:var(--card2)}
+  #sheet .hero img{width:100%;height:100%;object-fit:cover;display:block}
   .item.place .where{font-size:11px;font-weight:600;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .been{font-size:11px;font-weight:700;color:var(--teal-ink);white-space:nowrap}
   .stars{color:var(--salmon);font-size:12px;letter-spacing:1px}
@@ -223,6 +231,8 @@
   <symbol id="i-note" viewBox="0 0 24 24"><path d="M6 3h9l5 5v13H6z"/><path d="M14 3v6h6M9 13h7M9 17h5"/></symbol>
   <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
   <symbol id="i-plane" viewBox="0 0 24 24"><path d="M2 12l20-8-6 18-3-8z"/></symbol>
+  <symbol id="i-bag" viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></symbol>
+  <symbol id="i-hanger" viewBox="0 0 24 24"><path d="M12 7a2 2 0 1 1 2-2"/><path d="M12 7v2L3 16h18l-9-7"/></symbol>
   <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></symbol>
 </svg>
 
@@ -463,7 +473,8 @@
   $("newTodo").addEventListener("keydown", e => { if (e.key === "Enter") addTodo(); });
 
   // ---------- items (shared by Today, Inbox and Library) ----------
-  const ITEM_COLS = "id,url,source,category,subcategory,title,body,author,hashtags,ig_collection,folder,saved_at";
+  const ITEM_COLS = "id,url,source,category,categories,subcategory,title,body,author,hashtags,ig_collection,folder,saved_at,ai_status";
+  const PREVIEW = path => path ? `${SUPABASE_URL}/storage/v1/object/public/previews/${path}` : "";
   const sourceName = s => ({instagram:"Instagram", web:"TikTok", tiktok:"TikTok", icloud:"iCloud", apple_notes:"Notes", notion:"Notion"}[s] || s || "");
   const sourceColor = s => ({instagram:"#E1306C", web:"var(--teal)", tiktok:"var(--teal)", icloud:"#6B7CFF", apple_notes:"var(--salmon)", notion:"var(--ink)"}[s] || "var(--muted)");
   const tidy = s => (s || "").replace(/[-_]+/g, " ").trim();
@@ -473,7 +484,7 @@
   let displayName = {};
   function buildNames() {
     const tally = {};
-    allItems.forEach(i => { const p = place(i); [p.cat, p.sub].filter(Boolean).forEach(n => {
+    allItems.forEach(i => { const p = place(i); [...cats(i), p.sub].filter(Boolean).forEach(n => {
       const k = key(n); tally[k] = tally[k] || {}; tally[k][n] = (tally[k][n] || 0) + 1; }); });
     displayName = {};
     Object.entries(tally).forEach(([k, names]) => { displayName[k] = Object.entries(names).sort((a, b) => b[1] - a[1])[0][0]; });
@@ -489,8 +500,13 @@
       parts.pop(); // last part is the file name, not a folder
       return { cat: parts[0] ? tidy(parts[0]) : "Files", sub: parts[1] ? tidy(parts[1]) : "" };
     }
-    const cat = tidy(i.category) || tidy(i.ig_collection) || "Uncategorised";
+    const list = Array.isArray(i.categories) && i.categories.length ? i.categories : null;
+    const cat = (list ? list[0] : (tidy(i.category) || tidy(i.ig_collection))) || "Uncategorised";
     return { cat, sub: tidy(i.subcategory) };
+  }
+  function cats(i) {
+    if (i.source !== "icloud" && Array.isArray(i.categories) && i.categories.length) return i.categories;
+    return [place(i).cat];
   }
 
   function renderItem(i) {
@@ -501,10 +517,10 @@
       link = "shareddocuments:///private/var/mobile/Library/Mobile%20Documents/com~apple~CloudDocs/" + encodeURI(path);
     }
     const p = place(i);
-    const cat = [nice(p.cat), nice(p.sub)].filter(Boolean).join(" · ");
+    const cat = [cats(i).map(nice).join(" + "), nice(p.sub)].filter(Boolean).join(" · ");
     const preview = i.body && i.body !== i.title ? i.body : "";
     const inner = `
-      <div class="row"><span class="pill"><span class="dot" style="background:${sourceColor(i.source)}"></span><span class="t">${esc(sourceName(i.source))}</span></span>${i.saved_at ? `<span class="when">${esc(ago(i.saved_at))}</span>` : ""}</div>
+      <div class="row"><span class="pill"><span class="dot" style="background:${sourceColor(i.source)}"></span><span class="t">${esc(sourceName(i.source))}</span></span>${i.ai_status === "review" ? `<span class="pill check">Check</span>` : ""}${i.saved_at ? `<span class="when">${esc(ago(i.saved_at))}</span>` : ""}</div>
       <div class="body">
         ${cat ? `<div class="cat">${esc(cat)}</div>` : ""}
         <div class="title">${esc(i.title || "Untitled")}</div>
@@ -553,6 +569,8 @@
     if (/ai|prompt|claude|chatgpt/.test(n)) return ["i-spark", "teal"];
     if (/hustle|business|money|invest/.test(n)) return ["i-coin", "teal"];
     if (/exercis|workout|gym|fitness|yoga/.test(n)) return ["i-dumbbell", "salmon"];
+    if (/wish|buy|shop/.test(n)) return ["i-bag", "salmon"];
+    if (/fashion|outfit|style/.test(n)) return ["i-hanger", "teal"];
     if (/gift|diy|craft/.test(n)) return ["i-gift", "teal"];
     if (/iphone|phone|setting|tech|app/.test(n)) return ["i-phone", "salmon"];
     if (/game|social/.test(n)) return ["i-game", "teal"];
@@ -565,7 +583,7 @@
 
   function renderCategories() {
     const counts = {};
-    allItems.forEach(i => { const c = nice(place(i).cat); counts[c] = (counts[c] || 0) + 1; });
+    allItems.forEach(i => cats(i).forEach(c0 => { const c = nice(c0); counts[c] = (counts[c] || 0) + 1; }));
     const names = Object.keys(counts).sort((a, b) => a === "Uncategorised" ? 1 : b === "Uncategorised" ? -1 : counts[b] - counts[a]);
     $("catList").innerHTML = names.map(n => { const [ic, tone] = catIcon(n); return `
       <button class="card cat-tile" data-cat="${esc(n)}">
@@ -576,7 +594,7 @@
   }
 
   function openCategory(cat) {
-    const items = allItems.filter(i => key(place(i).cat) === key(cat));
+    const items = allItems.filter(i => cats(i).some(c => key(c) === key(cat)));
     const subs = [...new Set(items.map(i => nice(place(i).sub)).filter(Boolean))].sort();
     $("libCatTitle").textContent = title(cat);
     $("libCatCount").textContent = `${items.length} items`;
@@ -602,7 +620,7 @@
     if (!q) { $("libSearch").style.display = "none"; $("libCats").style.display = "block"; $("libCat").style.display = "none"; return; }
     const hit = allItems.filter(i => {
       const p = place(i);
-      return [i.title, i.body, i.hashtags, i.author, p.cat, p.sub].some(f => f && String(f).toLowerCase().includes(q));
+      return [i.title, i.body, i.hashtags, i.author, ...cats(i), p.sub].some(f => f && String(f).toLowerCase().includes(q));
     });
     $("searchCount").textContent = `${hit.length} result${hit.length === 1 ? "" : "s"}`;
     $("searchItems").innerHTML = hit.length ? hit.slice(0, 100).map(renderItem).join("") : `<div class="empty">Nothing matches "${esc(q)}".</div>`;
@@ -617,7 +635,7 @@
 
   async function loadPlaces() {
     const { data, error } = await sb.from("places")
-      .select("id,source,source_url,other_urls,name,summary,creator,place_type,tags,country,city,area,address,lat,lng,visited,my_rating,my_notes")
+      .select("id,source,source_url,other_urls,name,summary,creator,place_type,tags,country,city,area,address,lat,lng,visited,my_rating,my_notes,image_path")
       .order("name").limit(5000);
     if (error) { $("placeList").innerHTML = `<div class="empty">Couldn't load places: ${esc(error.message)}</div>`; return; }
     allPlaces = data;
@@ -671,12 +689,12 @@
 
     $("placeList").innerHTML = list.length ? list.slice(0, 300).map(p => `
       <button class="item place" data-id="${p.id}">
-        <div class="row"><span class="pill"><span class="t">${typeIcon(p.place_type)} ${esc(p.place_type || "Place")}</span></span>
-          ${p.visited ? `<span class="been">✓ Been</span>` : (p.my_rating ? `<span class="stars">${"★".repeat(p.my_rating)}</span>` : "")}</div>
-        <div class="body">
-          <div class="where">${esc([p.area, p.city].filter(Boolean).join(", ") || p.country || NO_CITY)}</div>
+        <div class="pic ${p.id % 2 ? "" : "alt"}">${p.image_path ? `<img src="${esc(PREVIEW(p.image_path))}" alt="" loading="lazy" onerror="this.remove()">` : ""}${p.image_path ? "" : typeIcon(p.place_type)}
+          ${p.visited ? `<span class="been">✓ Been</span>` : ""}</div>
+        <div class="txt">
+          <div class="where">${typeIcon(p.place_type)} ${esc([p.area, p.city].filter(Boolean).join(", ") || p.country || NO_CITY)}</div>
           <div class="title">${esc(p.name)}</div>
-          ${p.summary || p.my_notes ? `<div class="note">${esc(p.my_notes || p.summary)}</div>` : ""}
+          ${p.my_rating ? `<span class="stars">${"★".repeat(p.my_rating)}</span>` : ""}
         </div>
       </button>`).join("") : `<div class="empty">No places match these filters.</div>`;
     document.querySelectorAll(".item.place").forEach(b => b.onclick = () => openPlace(+b.dataset.id));
@@ -698,6 +716,7 @@
     const linkLabel = reel ? "Open reel" : /instagram/.test(p.source_url || "") ? "Open Instagram" : "Open page";
     const others = (p.other_urls || []).filter(Boolean);
     $("sheetBody").innerHTML = `
+      ${p.image_path ? `<div class="hero"><img src="${esc(PREVIEW(p.image_path))}" alt="" onerror="this.parentNode.remove()"></div>` : ""}
       <div class="meta">${typeIcon(p.place_type)} ${esc(p.place_type || "Place")}${(p.tags || []).length ? " · " + esc(p.tags.join(", ")) : ""}</div>
       <h2>${esc(p.name)}</h2>
       <div class="meta">${esc([p.area, p.city, p.country].filter(Boolean).join(", ") || NO_CITY)}</div>
