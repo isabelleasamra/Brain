@@ -135,6 +135,39 @@
   .chips button.on{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:700}
   .back{display:inline-flex;align-items:center;gap:4px;height:40px;padding:0 14px 0 10px;border-radius:var(--r3);border:1px solid var(--line);background:var(--card);font-size:13px;font-weight:700;color:var(--ink);margin-bottom:12px}
 
+  /* ---------- places ---------- */
+  .chips.tight{padding-bottom:10px}
+  .chiplabel{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:2px 0 8px}
+  .chips button .n{font-weight:600;color:var(--muted);margin-left:5px;font-size:12px}
+  .chips button.on .n{color:inherit;opacity:.7}
+  .item.place{cursor:pointer;text-align:left;width:100%}
+  .item.place .where{font-size:11px;font-weight:600;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .been{font-size:11px;font-weight:700;color:var(--teal-ink);white-space:nowrap}
+  .stars{color:var(--salmon);font-size:12px;letter-spacing:1px}
+  #sheetBg{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}
+  #sheetBg.show{opacity:1;pointer-events:auto}
+  #sheet{position:fixed;left:0;right:0;bottom:0;max-height:88dvh;overflow-y:auto;background:var(--bg);border-radius:28px 28px 0 0;
+    padding:10px var(--pad) calc(20px + env(safe-area-inset-bottom));transform:translateY(105%);transition:transform .25s ease;z-index:21;max-width:640px;margin:0 auto}
+  #sheet.show{transform:none}
+  #sheet .grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px;background:var(--muted);opacity:.35}
+  #sheet h2{font-size:24px;font-weight:600;line-height:1.15;margin:4px 0 4px}
+  #sheet .meta{color:var(--muted);font-size:14px;font-weight:600}
+  #sheet .addr{color:var(--muted);font-size:13px;margin-top:6px}
+  #sheet .block{background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:14px;margin-top:14px;font-size:14px;line-height:1.45;white-space:pre-wrap}
+  #sheet .block h3{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px}
+  #sheet .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+  #sheet .actions a,#sheet .actions button{display:flex;align-items:center;justify-content:center;gap:8px;height:50px;border-radius:var(--r3);font-weight:700;font-size:14px}
+  #sheet .actions .go{background:var(--teal);color:var(--on-accent)}
+  #sheet .actions .alt{background:var(--card);border:1px solid var(--line);color:var(--ink)}
+  #sheet .actions .off{opacity:.4;pointer-events:none}
+  .seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--card2);padding:4px;border-radius:16px;margin-top:16px}
+  .seg button{height:42px;border-radius:12px;font-size:14px;font-weight:700;color:var(--muted)}
+  .seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+  .rate{display:flex;gap:6px;margin-top:6px}
+  .rate button{font-size:28px;line-height:1;color:var(--muted);opacity:.45}
+  .rate button.on{color:var(--salmon);opacity:1}
+  .others a{display:block;font-size:13px;font-weight:600;padding:3px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
   /* ---------- ask ---------- */
   .msg{max-width:88%;padding:12px 16px;border-radius:20px;margin-bottom:10px;white-space:pre-wrap;word-break:break-word;line-height:1.45;font-size:15px}
   .msg.me{background:var(--teal);color:var(--on-accent);margin-left:auto;border-bottom-right-radius:6px;font-weight:500}
@@ -155,10 +188,10 @@
   .composer button{width:40px;height:40px;border-radius:14px;background:var(--teal);color:var(--on-accent);display:flex;align-items:center;justify-content:center;flex:none}
   .composer button:disabled{opacity:.5}
   .tabs{display:flex;justify-content:space-between;padding:0 4px}
-  .tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;width:64px;height:50px;border-radius:16px;color:var(--muted);font-size:11px;font-weight:600}
+  .tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;width:60px;height:50px;border-radius:16px;color:var(--muted);font-size:11px;font-weight:600}
   .tabs button.on{background:var(--teal-tint);color:var(--teal)}
 
-  .toast{position:fixed;left:50%;transform:translateX(-50%);top:calc(14px + env(safe-area-inset-top));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
+  .toast{position:fixed;left:50%;transform:translateX(-50%);top:calc(14px + env(safe-area-inset-top));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;z-index:30}
   .toast.show{opacity:1}
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -271,6 +304,18 @@
       </div>
     </div>
 
+    <!-- ===== PLACES ===== -->
+    <div class="screen" id="places">
+      <div class="heading"><div><div class="kicker" id="placesCount"></div><h1>Places</h1></div>
+        <button class="ghost" id="placesRefresh">Refresh</button></div>
+      <div class="chips tight" id="beenChips"></div>
+      <div class="chiplabel">Country</div><div class="chips tight" id="countryChips"></div>
+      <div id="cityWrap"><div class="chiplabel">City</div><div class="chips tight" id="cityChips"></div></div>
+      <div id="areaWrap"><div class="chiplabel">Area</div><div class="chips tight" id="areaChips"></div></div>
+      <div class="chips" id="typeChips"></div>
+      <div class="items" id="placeList"></div>
+    </div>
+
     <!-- ===== ASK ===== -->
     <div class="screen" id="ask">
       <div class="heading"><div><div class="kicker">Answered from your saves</div><h1>Ask</h1></div><button class="ghost" id="clearChat">Clear</button></div>
@@ -295,6 +340,10 @@
       <svg class="i"><use href="#i-search"/></svg>
       <input id="searchBox" type="search" placeholder="Search your brain" enterkeyhint="search" autocomplete="off">
     </div>
+    <div class="composer" id="placeBar" style="display:none">
+      <svg class="i"><use href="#i-search"/></svg>
+      <input id="placeBox" type="search" placeholder="Search places" enterkeyhint="search" autocomplete="off">
+    </div>
     <div class="composer" id="askBar" style="display:none">
       <svg class="i"><use href="#i-spark"/></svg>
       <input id="askBox" placeholder="Ask your brain…" enterkeyhint="send" autocomplete="off">
@@ -304,10 +353,14 @@
       <button data-tab="today" class="on"><svg class="i"><use href="#i-home"/></svg>Today</button>
       <button data-tab="inbox"><svg class="i"><use href="#i-inbox"/></svg>Inbox</button>
       <button data-tab="library"><svg class="i"><use href="#i-grid"/></svg>Library</button>
+      <button data-tab="places"><svg class="i"><use href="#i-pin"/></svg>Places</button>
       <button data-tab="ask"><svg class="i"><use href="#i-spark"/></svg>Ask</button>
     </div>
   </div></div>
 </section>
+
+<div id="sheetBg"></div>
+<div id="sheet" role="dialog" aria-modal="true"><div class="grab"></div><div id="sheetBody"></div></div>
 
 <div class="toast" id="toast"></div>
 
@@ -344,7 +397,7 @@
     const on = !!session;
     $("auth").style.display = on ? "none" : "flex";
     $("app").style.display = on ? "flex" : "none";
-    if (on) { loadTodos(); loadInbox(); loadLibrary(); }
+    if (on) { loadTodos(); loadInbox(); loadLibrary(); loadPlaces(); }
   });
 
   // ---------- tabs ----------
@@ -354,6 +407,7 @@
     $("composer").style.display = name === "today" ? "flex" : "none";
     $("searchBar").style.display = name === "library" ? "flex" : "none";
     $("askBar").style.display = name === "ask" ? "flex" : "none";
+    $("placeBar").style.display = name === "places" ? "flex" : "none";
     window.scrollTo(0,0);
   }
   document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => goTab(b.dataset.tab));
@@ -463,7 +517,7 @@
   // ---------- inbox ----------
   async function loadInbox() {
     const { data, error } = await sb.from("items").select(ITEM_COLS)
-      .neq("source", "icloud").order("saved_at", { ascending: false }).limit(60);
+      .neq("source", "icloud").not("hidden", "is", true).order("saved_at", { ascending: false }).limit(60);
     if (error) { $("itemList").innerHTML = `<div class="empty">Couldn't load items: ${esc(error.message)}</div>`; return; }
     $("inboxCount").textContent = data.length ? `Latest ${data.length} saves` : "";
     $("inboxBig").textContent = data.length;
@@ -475,7 +529,7 @@
   // ---------- library ----------
   let allItems = [];
   async function loadLibrary() {
-    const { data, error } = await sb.from("items").select(ITEM_COLS).order("saved_at", { ascending: false }).limit(5000);
+    const { data, error } = await sb.from("items").select(ITEM_COLS).not("hidden", "is", true).order("saved_at", { ascending: false }).limit(5000);
     if (error) { $("catList").innerHTML = `<div class="empty">Couldn't load your library: ${esc(error.message)}</div>`; return; }
     allItems = data; buildNames();
     $("libCount").textContent = `${data.length} items`;
@@ -554,6 +608,131 @@
     $("searchItems").innerHTML = hit.length ? hit.slice(0, 100).map(renderItem).join("") : `<div class="empty">Nothing matches "${esc(q)}".</div>`;
     $("libCats").style.display = "none"; $("libCat").style.display = "none"; $("libSearch").style.display = "block";
   });
+
+  // ---------- places ----------
+  let allPlaces = [];
+  const pf = { been: "", country: "", city: "", area: "", type: "", q: "" };
+  const NO_CITY = "Not sorted yet";
+  const typeIcon = t => ({ Restaurant: "🍽", "Café": "☕", Bar: "🍸", "Beach Club": "🏖", Stay: "🛏", Activity: "🎯", Attraction: "🏛", Nature: "🌿", Shop: "🛍" }[t] || "📍");
+
+  async function loadPlaces() {
+    const { data, error } = await sb.from("places")
+      .select("id,source,source_url,other_urls,name,summary,creator,place_type,tags,country,city,area,address,lat,lng,visited,my_rating,my_notes")
+      .order("name").limit(5000);
+    if (error) { $("placeList").innerHTML = `<div class="empty">Couldn't load places: ${esc(error.message)}</div>`; return; }
+    allPlaces = data;
+    renderPlaces();
+  }
+  $("placesRefresh").onclick = () => { loadPlaces(); toast("Refreshed"); };
+
+  // count values of `field` among places that pass every filter except the ones listed in `skip`
+  function tally(field, skip) {
+    const c = {};
+    filtered(skip).forEach(p => { const v = p[field] || (field === "country" ? NO_CITY : ""); if (v) c[v] = (c[v] || 0) + 1; });
+    return Object.entries(c).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  }
+  function filtered(skip = []) {
+    const q = pf.q.toLowerCase();
+    return allPlaces.filter(p =>
+      (skip.includes("been") || !pf.been || (pf.been === "been" ? p.visited : !p.visited)) &&
+      (skip.includes("country") || !pf.country || (p.country || NO_CITY) === pf.country) &&
+      (skip.includes("city") || !pf.city || p.city === pf.city) &&
+      (skip.includes("area") || !pf.area || p.area === pf.area) &&
+      (skip.includes("type") || !pf.type || p.place_type === pf.type) &&
+      (!q || [p.name, p.summary, p.my_notes, p.city, p.area, p.country, p.place_type, (p.tags || []).join(" "), p.creator]
+              .some(f => f && String(f).toLowerCase().includes(q))));
+  }
+  function chipRow(el, entries, current, keyName, allLabel = "All") {
+    el.innerHTML = [`<button class="${current ? "" : "on"}" data-v="">${allLabel}</button>`,
+      ...entries.map(([v, n]) => `<button class="${v === current ? "on" : ""}" data-v="${esc(v)}">${esc(v)}<span class="n">${n}</span></button>`)].join("");
+    el.querySelectorAll("button").forEach(b => b.onclick = () => {
+      pf[keyName] = b.dataset.v;
+      if (keyName === "country") { pf.city = ""; pf.area = ""; }
+      if (keyName === "city") pf.area = "";
+      renderPlaces();
+    });
+  }
+  function renderPlaces() {
+    const list = filtered();
+    $("placesCount").textContent = `${list.length} of ${allPlaces.length} places`;
+    // been there / not yet
+    const beenN = filtered(["been"]).filter(p => p.visited).length, notN = filtered(["been"]).filter(p => !p.visited).length;
+    $("beenChips").innerHTML = [["", "All"], ["not", `Not yet <span class="n">${notN}</span>`], ["been", `Been there <span class="n">${beenN}</span>`]]
+      .map(([v, l]) => `<button class="${pf.been === v ? "on" : ""}" data-v="${v}">${l}</button>`).join("");
+    $("beenChips").querySelectorAll("button").forEach(b => b.onclick = () => { pf.been = b.dataset.v; renderPlaces(); });
+
+    chipRow($("countryChips"), tally("country", ["country", "city", "area"]), pf.country, "country");
+    $("cityWrap").style.display = pf.country ? "block" : "none";
+    if (pf.country) chipRow($("cityChips"), tally("city", ["city", "area"]), pf.city, "city");
+    const areas = pf.city ? tally("area", ["area"]) : [];
+    $("areaWrap").style.display = areas.length ? "block" : "none";
+    if (areas.length) chipRow($("areaChips"), areas, pf.area, "area");
+    chipRow($("typeChips"), tally("place_type", ["type"]), pf.type, "type", "All types");
+
+    $("placeList").innerHTML = list.length ? list.slice(0, 300).map(p => `
+      <button class="item place" data-id="${p.id}">
+        <div class="row"><span class="pill"><span class="t">${typeIcon(p.place_type)} ${esc(p.place_type || "Place")}</span></span>
+          ${p.visited ? `<span class="been">✓ Been</span>` : (p.my_rating ? `<span class="stars">${"★".repeat(p.my_rating)}</span>` : "")}</div>
+        <div class="body">
+          <div class="where">${esc([p.area, p.city].filter(Boolean).join(", ") || p.country || NO_CITY)}</div>
+          <div class="title">${esc(p.name)}</div>
+          ${p.summary || p.my_notes ? `<div class="note">${esc(p.my_notes || p.summary)}</div>` : ""}
+        </div>
+      </button>`).join("") : `<div class="empty">No places match these filters.</div>`;
+    document.querySelectorAll(".item.place").forEach(b => b.onclick = () => openPlace(+b.dataset.id));
+  }
+  $("placeBox").addEventListener("input", () => { pf.q = $("placeBox").value.trim(); renderPlaces(); });
+
+  // ---------- place detail sheet ----------
+  function closeSheet() { $("sheet").classList.remove("show"); $("sheetBg").classList.remove("show"); }
+  $("sheetBg").onclick = closeSheet;
+  function mapsLink(p) {
+    const q = encodeURIComponent([p.name, p.area, p.city, p.country].filter(Boolean).join(", "));
+    return (p.lat != null && p.lng != null)
+      ? `https://maps.apple.com/?daddr=${p.lat},${p.lng}&q=${encodeURIComponent(p.name)}`
+      : `https://maps.apple.com/?q=${q}`;
+  }
+  function openPlace(id) {
+    const p = allPlaces.find(x => x.id === id); if (!p) return;
+    const reel = p.source_url && /instagram\.com\/(reel|p)\/|tiktok\.com/.test(p.source_url);
+    const linkLabel = reel ? "Open reel" : /instagram/.test(p.source_url || "") ? "Open Instagram" : "Open page";
+    const others = (p.other_urls || []).filter(Boolean);
+    $("sheetBody").innerHTML = `
+      <div class="meta">${typeIcon(p.place_type)} ${esc(p.place_type || "Place")}${(p.tags || []).length ? " · " + esc(p.tags.join(", ")) : ""}</div>
+      <h2>${esc(p.name)}</h2>
+      <div class="meta">${esc([p.area, p.city, p.country].filter(Boolean).join(", ") || NO_CITY)}</div>
+      ${p.address ? `<div class="addr">${esc(p.address)}</div>` : ""}
+      <div class="actions">
+        <a class="go" href="${esc(mapsLink(p))}" target="_blank" rel="noopener">${icon("i-pin")}Directions</a>
+        <a class="alt ${p.source_url ? "" : "off"}" href="${esc(p.source_url || "#")}" target="_blank" rel="noopener">${icon("i-spark")}${linkLabel}</a>
+      </div>
+      <div class="seg" id="beenSeg">
+        <button data-v="0" class="${p.visited ? "" : "on"}">Not yet</button>
+        <button data-v="1" class="${p.visited ? "on" : ""}">Been there</button>
+      </div>
+      <div class="block"><h3>My rating</h3><div class="rate" id="rate">${[1,2,3,4,5].map(n => `<button data-n="${n}" class="${(p.my_rating || 0) >= n ? "on" : ""}" aria-label="${n} stars">★</button>`).join("")}</div></div>
+      ${p.my_notes ? `<div class="block"><h3>My notes</h3>${esc(p.my_notes)}</div>` : ""}
+      ${p.summary && p.summary !== p.my_notes ? `<div class="block"><h3>Why go</h3>${esc(p.summary)}</div>` : ""}
+      ${others.length ? `<div class="block others"><h3>Also in</h3>${others.map((u, i) => `<a href="${esc(u)}" target="_blank" rel="noopener">Post ${i + 2}</a>`).join("")}</div>` : ""}
+      ${p.creator ? `<div class="addr" style="margin-top:14px">Saved from ${esc(p.creator)}</div>` : ""}`;
+    $("beenSeg").querySelectorAll("button").forEach(b => b.onclick = async () => {
+      const v = b.dataset.v === "1"; if (v === !!p.visited) return;
+      p.visited = v; $("beenSeg").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
+      const { error } = await sb.from("places").update({ visited: v, visited_on: v ? todayISO() : null }).eq("id", p.id);
+      if (error) { toast("Couldn't save: " + error.message); p.visited = !v; openPlace(id); return; }
+      toast(v ? "Marked as been there" : "Marked as not yet"); renderPlaces();
+    });
+    $("rate").querySelectorAll("button").forEach(b => b.onclick = async () => {
+      const n = +b.dataset.n === p.my_rating ? null : +b.dataset.n; // tap the same star again to clear
+      const before = p.my_rating; p.my_rating = n;
+      $("rate").querySelectorAll("button").forEach(x => x.classList.toggle("on", (n || 0) >= +x.dataset.n));
+      const { error } = await sb.from("places").update({ my_rating: n }).eq("id", p.id);
+      if (error) { toast("Couldn't save: " + error.message); p.my_rating = before; openPlace(id); return; }
+      renderPlaces();
+    });
+    $("sheet").scrollTop = 0;
+    $("sheet").classList.add("show"); $("sheetBg").classList.add("show");
+  }
 
   // ---------- ask ----------
   let history = [];
